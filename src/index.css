@@ -125,6 +125,11 @@ hr.RampBreak--l {
 
 .RampInputCheckbox--container {
   display: flex;
+
+  /* added for bug 2: this is to make sure html 
+  checkbox and green-blue checkbox are aligned */
+  align-items: center;
+  justify-content: center;
 }
 
 .RampInputCheckbox--label {
@@ -136,7 +141,8 @@ hr.RampBreak--l {
   padding: 0.125rem;
   width: 1.25rem;
   height: 1.25rem;
-  cursor: pointer;
+  /* no longer needed as hitbox has this instead: */
+  /* cursor: pointer; */
 }
 
 .RampInputCheckbox--label-disabled {
@@ -152,7 +158,20 @@ hr.RampBreak--l {
 }
 
 .RampInputCheckbox--input {
-  display: none;
+  opacity: 0;
+  /* bug 2: display should not be none. That is 
+  for displaying children elements. Instead, this needs
+   to be invisible but still have pointer-events on. 
+   Then, it just needs to be set to absolute positioning 
+   so it can be fixed relative to the parent's center 
+   given the parent's flexbox center arguments.
+   
+   Now, this is the invisible hitbox for the green-blue checkbox*/
+  position: absolute;
+
+  /* added this so checkbox hitbox has pointer cursor upon hover */
+  cursor: pointer; 
+
 }
 
 .RampButton {
