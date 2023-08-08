@@ -64,8 +64,17 @@ export function App() {
             if (newValue === null) {
               return
             }
+            //fix third bug by handling case where there is no id (all):
+            if(newValue.id === "") {
+              //because loading useEffect has already fetched all employees, just need
+              //to display it using this (and not the loadAllTransactions() function)
+              await paginatedTransactionsUtils.fetchAll()
+            }
+            //moved this await statement to else so that it runs on any other selected employee:
+            else {
+              await loadTransactionsByEmployee(newValue.id)
+            }
 
-            await loadTransactionsByEmployee(newValue.id)
           }}
         />
 
