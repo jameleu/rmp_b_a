@@ -92,7 +92,9 @@ hr.RampBreak--l {
 
 .RampInputSelect--dropdown-container {
   display: none;
-  position: fixed; 
+  /* bug 1: position is fixed instead of absolute. 
+  need absolute so it is fixed relative to its parent element.*/
+  position: absolute; 
   width: 100%;
   max-width: 700px;
   border: 1px solid var(--color-darker-shade);
