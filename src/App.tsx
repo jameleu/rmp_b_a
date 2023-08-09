@@ -13,11 +13,6 @@ export function App() {
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
 
-  //fixed the 6th bug with filterOn state that represents if an employee filter is on
-  // to filter the transactions. Also fixed it in ./usePaginatedTransactions.ts and its type file
-  // by creating a state that represents if there is a next page
-  const [filterOn, setFilterOn] = useState(false);
-
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
     [paginatedTransactions, transactionsByEmployee]
@@ -36,7 +31,6 @@ export function App() {
       paginatedTransactionsUtils.invalidateData()
       
       await transactionsByEmployeeUtils.fetchById(employeeId)
-      setFilterOn(true);
     },
     [paginatedTransactionsUtils, transactionsByEmployeeUtils]
   )
@@ -55,6 +49,7 @@ export function App() {
         <hr className="RampBreak--l" />
 
         <InputSelect<Employee>
+          //use existing loading variable in the utils instead of new state to fix bug 5
           isLoading={employeeUtils.loading}
           defaultValue={EMPTY_EMPLOYEE}
           items={employees === null ? [] : [EMPTY_EMPLOYEE, ...employees]}
@@ -92,8 +87,9 @@ export function App() {
               className="RampButton"
               // added additional conditions that button may be disabled on: when there is no next page
                  // and when a filter is on (because transactionsByEmployee data has no next page element,
-                 // viewing the next page is never possible with a filter on)
-              disabled={paginatedTransactionsUtils.loading || paginatedTransactionsUtils.no_next || filterOn}
+                 // viewing the next page is never possible with a filter on). a filter is on if paginatedTransactions is null
+                 // since paginatedTransactions data is invalidated if a filter is on
+              disabled={paginatedTransactionsUtils.loading || paginatedTransactionsUtils.no_next || !paginatedTransactions?.data}
               onClick={async () => {
                   //changed to fetchAll transactions, which is faster than fetchAll transactions and employees
                   await paginatedTransactionsUtils.fetchAll()
