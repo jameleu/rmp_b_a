@@ -12,10 +12,15 @@ export function App() {
   const { data: employees, ...employeeUtils } = useEmployees()
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
-  const [isLoading, setIsLoading] = useState(false); //is for transactions
+  const [isLoading, setTransactionIsLoading] = useState(false);
   //fixed the 5th bug by adding a new state to keep track of the employees loading isntead
   //of just the transactions. Passed this state as the loading parameter for employees input select
   const [employeeIsLoading, setEmployeeIsLoading] = useState(false);
+
+  //fixed the 6th bug with filterOn state that represents if an employee filter is on
+  // to filter the transactions. Also fixed it in ./usePaginatedTransactions.ts and its type file
+  // by creating a state that represents if there is a next page
+  const [filterOn, setFilterOn] = useState(false);
 
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
@@ -23,7 +28,7 @@ export function App() {
   )
 
   const loadAllTransactions = useCallback(async () => {
-    setIsLoading(true)
+    setTransactionIsLoading(true)
     setEmployeeIsLoading(true)
     transactionsByEmployeeUtils.invalidateData()
 
@@ -31,13 +36,15 @@ export function App() {
     setEmployeeIsLoading(false)
     await paginatedTransactionsUtils.fetchAll()
 
-    setIsLoading(false)
+    setTransactionIsLoading(false)
   }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils])
 
   const loadTransactionsByEmployee = useCallback(
     async (employeeId: string) => {
       paginatedTransactionsUtils.invalidateData()
+      
       await transactionsByEmployeeUtils.fetchById(employeeId)
+      setFilterOn(true);
     },
     [paginatedTransactionsUtils, transactionsByEmployeeUtils]
   )
@@ -91,10 +98,13 @@ export function App() {
           {transactions !== null && (
             <button
               className="RampButton"
-              // added additional condition that button may be disabled on: when there is no next page
-              disabled={paginatedTransactionsUtils.loading || paginatedTransactionsUtils.no_next}
+              // added additional conditions that button may be disabled on: when there is no next page
+                 // and when a filter is on (because transactionsByEmployee data has no next page element,
+                 // viewing the next page is never possible with a filter on)
+              disabled={paginatedTransactionsUtils.loading || paginatedTransactionsUtils.no_next || filterOn}
               onClick={async () => {
-                await loadAllTransactions()
+                  //changed to fetchAll transactions, which is faster than fetchAll transactions and employees
+                  await paginatedTransactionsUtils.fetchAll()
               }}
             >
               View More
