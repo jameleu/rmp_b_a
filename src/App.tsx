@@ -12,10 +12,6 @@ export function App() {
   const { data: employees, ...employeeUtils } = useEmployees()
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
-  const [isLoading, setTransactionIsLoading] = useState(false);
-  //fixed the 5th bug by adding a new state to keep track of the employees loading isntead
-  //of just the transactions. Passed this state as the loading parameter for employees input select
-  const [employeeIsLoading, setEmployeeIsLoading] = useState(false);
 
   //fixed the 6th bug with filterOn state that represents if an employee filter is on
   // to filter the transactions. Also fixed it in ./usePaginatedTransactions.ts and its type file
@@ -28,15 +24,11 @@ export function App() {
   )
 
   const loadAllTransactions = useCallback(async () => {
-    setTransactionIsLoading(true)
-    setEmployeeIsLoading(true)
     transactionsByEmployeeUtils.invalidateData()
 
     await employeeUtils.fetchAll()
-    setEmployeeIsLoading(false)
     await paginatedTransactionsUtils.fetchAll()
 
-    setTransactionIsLoading(false)
   }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils])
 
   const loadTransactionsByEmployee = useCallback(
@@ -63,7 +55,7 @@ export function App() {
         <hr className="RampBreak--l" />
 
         <InputSelect<Employee>
-          isLoading={employeeIsLoading}
+          isLoading={employeeUtils.loading}
           defaultValue={EMPTY_EMPLOYEE}
           items={employees === null ? [] : [EMPTY_EMPLOYEE, ...employees]}
           label="Filter by employee"
