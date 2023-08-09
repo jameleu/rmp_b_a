@@ -91,7 +91,8 @@ export function App() {
           {transactions !== null && (
             <button
               className="RampButton"
-              disabled={paginatedTransactionsUtils.loading}
+              // added additional condition that button may be disabled on: when there is no next page
+              disabled={paginatedTransactionsUtils.loading || paginatedTransactionsUtils.no_next}
               onClick={async () => {
                 await loadAllTransactions()
               }}

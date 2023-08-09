@@ -9,6 +9,9 @@ export function usePaginatedTransactions(): PaginatedTransactionsResult {
     Transaction[]
   > | null>(null)
 
+//added new state to keep track of if there is a page after the current transaction page
+  const [noNextPage, setNoNextPage] = useState(false);
+
   const fetchAll = useCallback(async () => {
 
     const response = await fetchWithCache<PaginatedResponse<Transaction[]>, PaginatedRequestParams>(
@@ -23,7 +26,12 @@ export function usePaginatedTransactions(): PaginatedTransactionsResult {
         return response
       }
 
-      return { data: [...previousResponse.data, ...response.data], nextPage: response.nextPage }
+      //set noNextPage as "true" to represent that there's "no next page"
+      if(response.nextPage === null) {
+        setNoNextPage(true);
+      }
+
+      return { data: [...previousResponse.data, ...response.data], nextPage: response.nextPage}
     })
   }, [fetchWithCache, paginatedTransactions])
 
@@ -31,5 +39,6 @@ export function usePaginatedTransactions(): PaginatedTransactionsResult {
     setPaginatedTransactions(null)
   }, [])
 
-  return { data: paginatedTransactions, loading, fetchAll, invalidateData }
+  //return noNextPage state in return object
+  return { data: paginatedTransactions, loading, fetchAll, invalidateData, no_next: noNextPage}
 }
